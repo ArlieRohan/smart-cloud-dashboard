@@ -37,53 +37,22 @@ Users can:
 
 ## 🧩 Architecture
 
-# 🏗️ Improved Architecture
-
-Below is an improved, production-aware architecture for the **Smart Cloud Dashboard**.  
-It keeps your current EC2 + Flask design but adds best-practice components for security, availability, and maintainability.
-
----
-
-## Mermaid diagram (rendered on GitHub)
-```mermaid
-flowchart LR
-  subgraph Internet
-    User[User Browser]
-  end
-
-  subgraph AWS-VPC
-    direction TB
-    ALB[Application Load Balancer<br/>(HTTPS, ACM TLS)]
-    subgraph PublicSubnet
-      NATGW[NAT Gateway]
-      ALB
-    end
-
-    subgraph PrivateSubnet-AZ1
-      EC2A[EC2 Instance (Flask + Gunicorn)<br/>AutoScaling Group (min=1,max=3)]
-    end
-
-    subgraph PrivateSubnet-AZ2
-      EC2B[EC2 Instance (Flask + Gunicorn)]
-    end
-
-    RDS[(Optional) RDS / Postgres]
-    S3[S3 (static assets, logs, screenshots)]
-    CW[CloudWatch (Metrics & Logs)]
-    IAMrole[EC2 IAM Role: EC2ReadOnly + CloudWatchReadOnly + CustomControlPolicy]
-    Secrets[Secrets Manager / Parameter Store]
-  end
-
-  User -->|HTTPS| ALB
-  ALB --> EC2A
-  ALB --> EC2B
-  EC2A -->|CloudWatch APIs| CW
-  EC2A -->|EC2 Control APIs (via IAM role)| AWSec2[(AWS EC2 API)]
-  EC2A --> S3
-  EC2A --> RDS
-  EC2A --> Secrets
-  IAMrole --- EC2A
-  NATGW -->|outbound| Internet
+[User Browser]
+     |
+     v
+[ALB (HTTPS, ACM cert)]
+     |
+     v
++-------------------------------+
+|         Private Subnets       |
+|  +-------------------------+  |
+|  | AutoScaling Group (EC2) |--+--> [CloudWatch]
+|  | - Flask + Gunicorn      |      [S3 static/logs]
+|  +-------------------------+      [AWS EC2 API]
++-------------------------------+
+     |                 |
+     v                 v
+  [RDS] (optional)   [Secrets Manager / Parameter Store]
 
 
 
