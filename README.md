@@ -35,28 +35,7 @@ Users can:
 
 ---
 
-## 🧩 Architecture
 
-[User Browser]
-     |
-     v
-[ALB (HTTPS, ACM cert)]
-     |
-     v
-+-------------------------------+
-|         Private Subnets       |
-|  +-------------------------+  |
-|  | AutoScaling Group (EC2) |--+--> [CloudWatch]
-|  | - Flask + Gunicorn      |      [S3 static/logs]
-|  +-------------------------+      [AWS EC2 API]
-+-------------------------------+
-     |                 |
-     v                 v
-  [RDS] (optional)   [Secrets Manager / Parameter Store]
-
-
-
----
 
 ## 🖼️ Screenshots
 
